@@ -1,9 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { v4 as uuidv4 } from 'uuid'
+import { rateLimit, getRequestIdentifier } from '@/lib/rateLimit'
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 5 signup attempts per 15 minutes per IP
+    const identifier = getRequestIdentifier(req, 'signup')
+    const rl = rateLimit(identifier, { limit: 5, windowMs: 15 * 60 * 1000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many signup attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      )
+    }
+
     const { email, password, name, referralCode } = await req.json() as {
       email: string
       password: string

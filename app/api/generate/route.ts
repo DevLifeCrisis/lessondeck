@@ -3,22 +3,43 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { generateLessonPlan } from '@/lib/ai'
 import { canCreatePlan, incrementPlansUsed, saveLessonPlan, getUserProfile } from '@/lib/storage'
+import { rateLimit, getRequestIdentifier } from '@/lib/rateLimit'
+
+// Input length limits
+const MAX_TOPIC_LEN = 500
+const MAX_FIELD_LEN = 100
+
+function sanitizeField(value: unknown, maxLen: number): string {
+  if (typeof value !== 'string') return ''
+  return value.replace(/[\u0000-\u001F\u007F]/g, '').substring(0, maxLen).trim()
+}
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: 20 generations per hour per IP
+    const identifier = getRequestIdentifier(req, 'generate')
+    const rl = rateLimit(identifier, { limit: 20, windowMs: 60 * 60 * 1000 })
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      )
+    }
+
     const session = await getServerSession(authOptions)
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { grade, subject, standardsState, topic, duration, save } = await req.json() as {
-      grade: string
-      subject: string
-      standardsState: string
-      topic: string
-      duration?: string
-      save?: boolean
-    }
+    const body = await req.json() as Record<string, unknown>
+
+    // Sanitize + validate all AI prompt fields
+    const grade = sanitizeField(body.grade, MAX_FIELD_LEN)
+    const subject = sanitizeField(body.subject, MAX_FIELD_LEN)
+    const standardsState = sanitizeField(body.standardsState, MAX_FIELD_LEN)
+    const topic = sanitizeField(body.topic, MAX_TOPIC_LEN)
+    const duration = body.duration ? sanitizeField(body.duration, MAX_FIELD_LEN) : undefined
+    const save = body.save !== false
 
     if (!grade || !subject || !standardsState || !topic) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -43,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     // Save to storage if requested
     let savedPlan = null
-    if (save !== false) {
+    if (save) {
       savedPlan = await saveLessonPlan({
         userId: session.user.id,
         title: generated.title,

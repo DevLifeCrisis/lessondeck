@@ -27,8 +27,8 @@ export async function PATCH(req: NextRequest) {
 
     const updates = await req.json() as Record<string, string | number | boolean>
     
-    // Only allow safe updates
-    const allowedFields = ['name', 'subscriptionStatus', 'burstPlans']
+    // Only allow safe updates — subscriptionStatus and burstPlans must ONLY be set server-side via admin/webhook
+    const allowedFields = ['name']
     const safeUpdates: Record<string, string | number | boolean> = {}
     for (const key of allowedFields) {
       if (key in updates) {

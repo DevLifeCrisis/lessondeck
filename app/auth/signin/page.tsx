@@ -52,7 +52,7 @@ function SignInForm() {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-xl">LessonForge</span>
+            <span className="font-bold text-gray-900 text-xl">LessonDeck</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome back</h1>
@@ -142,7 +142,7 @@ function SignInForm() {
         <div className="absolute inset-0 bg-indigo-900/40" />
         <div className="absolute bottom-12 left-12 right-12 text-white">
           <blockquote className="text-xl font-medium italic mb-3">
-            &ldquo;LessonForge saved me 6 hours this week alone. I can&apos;t imagine planning without it.&rdquo;
+            &ldquo;LessonDeck saved me 6 hours this week alone. I can&apos;t imagine planning without it.&rdquo;
           </blockquote>
           <p className="text-indigo-200 text-sm">— Jessica T., 4th Grade Teacher</p>
         </div>

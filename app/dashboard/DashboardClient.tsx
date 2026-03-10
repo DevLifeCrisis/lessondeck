@@ -68,7 +68,7 @@ export default function DashboardClient({ user, profile, recentPlans, totalPlans
                 <p className="text-indigo-200 text-sm mt-1">Get 15 AI-generated lesson plans per month for $49/year</p>
               </div>
               <a
-                href="mailto:support@lessonforge.app?subject=Activate Subscription"
+                href="mailto:support@lessondeck.app?subject=Activate Subscription"
                 className="bg-white text-indigo-700 font-semibold px-6 py-3 rounded-xl hover:bg-indigo-50 transition-colors text-sm whitespace-nowrap min-h-[48px] flex items-center"
               >
                 Activate Now — $49/yr

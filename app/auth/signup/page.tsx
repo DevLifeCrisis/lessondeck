@@ -81,7 +81,7 @@ function SignUpForm() {
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-xl">LessonForge</span>
+            <span className="font-bold text-xl">LessonDeck</span>
           </div>
           <h2 className="text-3xl font-bold mb-4">Join 2,400+ teachers saving time every week</h2>
           <ul className="space-y-3">
@@ -107,7 +107,7 @@ function SignUpForm() {
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
-            <span className="font-bold text-gray-900 text-xl">LessonForge</span>
+            <span className="font-bold text-gray-900 text-xl">LessonDeck</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Create your account</h1>

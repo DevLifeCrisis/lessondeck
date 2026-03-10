@@ -112,7 +112,7 @@ export default function CreateClient({ profile, isAdmin }: CreateClientProps) {
                 <p className="text-sm font-medium text-amber-800">Subscription required</p>
                 <p className="text-sm text-amber-700 mt-0.5">
                   Activate your subscription to generate lesson plans.{' '}
-                  <a href="mailto:support@lessonforge.app" className="underline">Contact us</a> to get started.
+                  <a href="mailto:support@lessondeck.app" className="underline">Contact us</a> to get started.
                 </p>
               </div>
             </div>

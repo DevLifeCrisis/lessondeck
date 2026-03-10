@@ -36,7 +36,7 @@ export default function LandingPage() {
             </h1>
             
             <p className="text-lg sm:text-xl text-indigo-100 mb-8 leading-relaxed">
-              LessonForge uses AI to generate fully standards-aligned, differentiated lesson plans 
+              LessonDeck uses AI to generate fully standards-aligned, differentiated lesson plans 
               tailored to your grade, subject, and state. Spend less time planning, more time teaching.
             </p>
 
@@ -104,7 +104,7 @@ export default function LandingPage() {
               From Topic to Lesson Plan in 3 Steps
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              No more hours spent on planning. LessonForge handles the heavy lifting so you can focus on what matters — your students.
+              No more hours spent on planning. LessonDeck handles the heavy lifting so you can focus on what matters — your students.
             </p>
           </div>
 
@@ -200,7 +200,7 @@ export default function LandingPage() {
               <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                 <Image
                   src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=800&q=80"
-                  alt="Teacher using LessonForge on tablet in classroom"
+                  alt="Teacher using LessonDeck on tablet in classroom"
                   width={800}
                   height={600}
                   className="w-full object-cover"
@@ -239,7 +239,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
-              Teachers Love LessonForge
+              Teachers Love LessonDeck
             </h2>
             <p className="text-indigo-300 text-lg">Real feedback from real classrooms</p>
           </div>
@@ -255,13 +255,13 @@ export default function LandingPage() {
               {
                 name: 'David K.',
                 role: '8th Grade Science, Ohio',
-                text: 'The differentiation strategies are what sold me. I have 8 IEP students and the accommodations LessonForge generates are actually useful.',
+                text: 'The differentiation strategies are what sold me. I have 8 IEP students and the accommodations LessonDeck generates are actually useful.',
                 avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80',
               },
               {
                 name: 'Maria L.',
                 role: 'High School English, California',
-                text: 'Our whole department switched to LessonForge. The district bulk pricing made it easy to get admin buy-in. Best $29/seat I\'ve seen.',
+                text: 'Our whole department switched to LessonDeck. The district bulk pricing made it easy to get admin buy-in. Best $29/seat I\'ve seen.',
                 avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80',
               },
             ].map((t) => (
@@ -371,7 +371,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <a
-                href="mailto:districts@lessonforge.app"
+                href="mailto:districts@lessondeck.app"
                 className="block w-full text-center bg-gray-900 text-white font-semibold px-6 py-4 rounded-xl hover:bg-gray-800 transition-colors min-h-[52px] flex items-center justify-center"
               >
                 Contact for District Pricing
@@ -408,10 +408,10 @@ export default function LandingPage() {
                 PTA Fundraiser Integration
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-                Bring LessonForge to Your Whole School
+                Bring LessonDeck to Your Whole School
               </h2>
               <p className="text-gray-600 text-lg mb-6">
-                Partner with your PTA to run a LessonForge fundraiser. Schools get discounted licenses, 
+                Partner with your PTA to run a LessonDeck fundraiser. Schools get discounted licenses, 
                 teachers get better tools, and PTAs earn revenue for school programs.
               </p>
               <ul className="space-y-3 mb-6">
@@ -428,7 +428,7 @@ export default function LandingPage() {
                 ))}
               </ul>
               <a
-                href="mailto:pta@lessonforge.app"
+                href="mailto:pta@lessondeck.app"
                 className="inline-flex items-center gap-2 bg-green-600 text-white font-semibold px-6 py-3 rounded-xl hover:bg-green-700 transition-colors min-h-[48px]"
               >
                 Learn About PTA Partnership
@@ -482,7 +482,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
                   <BookOpen className="w-5 h-5 text-white" />
                 </div>
-                <span className="font-bold text-white">LessonForge</span>
+                <span className="font-bold text-white">LessonDeck</span>
               </div>
               <p className="text-sm">AI-powered lesson planning for K-12 teachers.</p>
             </div>
@@ -497,9 +497,9 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold text-white text-sm mb-3">Support</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="mailto:support@lessonforge.app" className="hover:text-white transition-colors">Contact Us</a></li>
-                <li><a href="mailto:districts@lessonforge.app" className="hover:text-white transition-colors">District Sales</a></li>
-                <li><a href="mailto:pta@lessonforge.app" className="hover:text-white transition-colors">PTA Partners</a></li>
+                <li><a href="mailto:support@lessondeck.app" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="mailto:districts@lessondeck.app" className="hover:text-white transition-colors">District Sales</a></li>
+                <li><a href="mailto:pta@lessondeck.app" className="hover:text-white transition-colors">PTA Partners</a></li>
               </ul>
             </div>
             <div>
@@ -512,7 +512,7 @@ export default function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 pt-6 text-center text-xs text-gray-600">
-            <p>© 2026 LessonForge. All rights reserved. Generated content is the property of LessonForge and licensed to users for classroom use only. Redistribution or resale is prohibited.</p>
+            <p>© 2026 LessonDeck. All rights reserved. Generated content is the property of LessonDeck and licensed to users for classroom use only. Redistribution or resale is prohibited.</p>
           </div>
         </div>
       </footer>

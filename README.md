@@ -1,4 +1,4 @@
-# LessonForge 📚
+# LessonDeck 📚
 
 AI-powered lesson plan generator for K-12 teachers. Generate standards-aligned, differentiated lesson plans in 30 seconds.
 

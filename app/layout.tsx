@@ -9,7 +9,7 @@ import Navbar from '@/components/Navbar'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'LessonForge — AI-Powered Lesson Plans for Teachers',
+  title: 'LessonDeck — AI-Powered Lesson Plans for Teachers',
   description: 'Generate standards-aligned, differentiated lesson plans in 30 seconds. Built for K-12 teachers.',
   keywords: 'lesson plans, AI, teacher tools, K-12, education, standards-aligned',
 }

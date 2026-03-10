@@ -9,7 +9,8 @@ import Link from 'next/link'
 import {
   ArrowLeft, Download, Save, Loader2, CheckCircle,
   Bold, Italic, List, Heading2, Undo, Redo,
-  BookOpen, Tag, Clock, Globe
+  BookOpen, Tag, Clock, Globe, FileText, Presentation, FileCheck,
+  ChevronDown
 } from 'lucide-react'
 import type { LessonPlan } from '@/lib/storage'
 
@@ -17,11 +18,25 @@ interface LessonClientProps {
   plan: LessonPlan
 }
 
+type ExportFormat = 'pdf' | 'pptx' | 'docx'
+
+async function triggerDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  setTimeout(() => URL.revokeObjectURL(url), 10000)
+}
+
 export default function LessonClient({ plan }: LessonClientProps) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
-  const [exporting, setExporting] = useState(false)
+  const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null)
+  const [showExportMenu, setShowExportMenu] = useState(false)
   const [title, setTitle] = useState(plan.title)
 
   const editor = useEditor({
@@ -58,75 +73,40 @@ export default function LessonClient({ plan }: LessonClientProps) {
     }
   }, [editor, plan.id, title])
 
-  const handleExportPdf = useCallback(async () => {
-    if (!editor) return
-    setExporting(true)
+  const handleExport = useCallback(async (format: ExportFormat) => {
+    setExportingFormat(format)
+    setShowExportMenu(false)
     try {
-      const htmlContent = editor.getHTML()
+      const planData: LessonPlan = { ...plan, title }
 
-      // Dynamic import for client-side only
-      const jsPDF = (await import('jspdf')).default
-      const html2canvas = (await import('html2canvas')).default
+      let endpoint = `/api/export/${format}`
+      const body: Record<string, unknown> = { lessonPlan: planData }
+      if (format === 'pptx') body.theme = 'dark'
 
-      // Create a temporary div with the content
-      const printDiv = document.createElement('div')
-      printDiv.style.cssText = `
-        position: fixed;
-        top: -9999px;
-        left: -9999px;
-        width: 800px;
-        padding: 40px;
-        background: white;
-        font-family: Arial, sans-serif;
-        font-size: 12px;
-        line-height: 1.6;
-      `
-      printDiv.innerHTML = `
-        <h1 style="font-size: 20px; margin-bottom: 8px; color: #1e293b;">${title}</h1>
-        <div style="color: #64748b; font-size: 11px; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">
-          ${plan.grade} · ${plan.subject} · ${plan.standardsState} · ${plan.duration}
-        </div>
-        ${htmlContent}
-      `
-      document.body.appendChild(printDiv)
-
-      const canvas = await html2canvas(printDiv, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
       })
 
-      document.body.removeChild(printDiv)
-
-      const imgData = canvas.toDataURL('image/png')
-      const pdf = new jsPDF('p', 'mm', 'a4')
-      const pageWidth = pdf.internal.pageSize.getWidth()
-      const pageHeight = pdf.internal.pageSize.getHeight()
-      const imgWidth = pageWidth - 20
-      const imgHeight = (canvas.height * imgWidth) / canvas.width
-
-      let heightLeft = imgHeight
-      let position = 10
-
-      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
-      heightLeft -= pageHeight
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight
-        pdf.addPage()
-        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight)
-        heightLeft -= pageHeight
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Export failed' }))
+        throw new Error(err.error || 'Export failed')
       }
 
-      const fileName = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`
-      pdf.save(fileName)
+      const blob = await res.blob()
+      const safeTitle = title.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+      const ext = format
+      await triggerDownload(blob, `LessonDeck-${safeTitle}.${ext}`)
     } catch (err) {
-      console.error('PDF export failed:', err)
-      alert('PDF export failed. Please try again.')
+      console.error(`${format.toUpperCase()} export failed:`, err)
+      alert(`Export failed: ${(err as Error).message}`)
     } finally {
-      setExporting(false)
+      setExportingFormat(null)
     }
-  }, [editor, plan, title])
+  }, [plan, title])
+
+  const isExporting = exportingFormat !== null
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
@@ -171,7 +151,7 @@ export default function LessonClient({ plan }: LessonClientProps) {
         </div>
       </div>
 
-      {/* Toolbar */}
+      {/* Editor Toolbar */}
       <div className="bg-white border border-gray-200 rounded-t-xl px-3 py-2 flex flex-wrap items-center gap-1">
         <button
           onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -223,14 +203,50 @@ export default function LessonClient({ plan }: LessonClientProps) {
 
         {/* Action buttons */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportPdf}
-            disabled={exporting}
-            className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] disabled:opacity-60"
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            <span className="hidden sm:inline">Export PDF</span>
-          </button>
+          {/* Export dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowExportMenu(v => !v)}
+              disabled={isExporting}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-h-[36px] disabled:opacity-60"
+            >
+              {isExporting
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <Download className="w-4 h-4" />
+              }
+              <span className="hidden sm:inline">Export</span>
+              <ChevronDown className="w-3 h-3" />
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1 w-52 bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                <button
+                  onClick={() => handleExport('pptx')}
+                  disabled={isExporting}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                >
+                  <Presentation className="w-4 h-4 text-violet-600" />
+                  <span>Download Slides <span className="text-gray-400 text-xs">.pptx</span></span>
+                </button>
+                <button
+                  onClick={() => handleExport('pdf')}
+                  disabled={isExporting}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                >
+                  <FileText className="w-4 h-4 text-rose-500" />
+                  <span>Download Guide <span className="text-gray-400 text-xs">.pdf</span></span>
+                </button>
+                <button
+                  onClick={() => handleExport('docx')}
+                  disabled={isExporting}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
+                >
+                  <FileCheck className="w-4 h-4 text-blue-500" />
+                  <span>Download Doc <span className="text-gray-400 text-xs">.docx</span></span>
+                </button>
+              </div>
+            )}
+          </div>
+
           <button
             onClick={handleSave}
             disabled={saving}
@@ -255,29 +271,70 @@ export default function LessonClient({ plan }: LessonClientProps) {
         <EditorContent editor={editor} className="focus-within:ring-2 focus-within:ring-indigo-200 rounded-b-xl" />
       </div>
 
+      {/* Export Bar — mobile-friendly */}
+      <div className="mt-6 bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-100 rounded-2xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <Download className="w-4 h-4 text-violet-600" />
+          <span className="text-sm font-semibold text-violet-900">Export Lesson</span>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          {/* PPTX */}
+          <button
+            onClick={() => handleExport('pptx')}
+            disabled={isExporting}
+            className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-colors text-sm font-medium disabled:opacity-60 min-h-[48px]"
+          >
+            {exportingFormat === 'pptx'
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Presentation className="w-4 h-4" />
+            }
+            <span>📊 Download Slides</span>
+            <span className="text-violet-300 text-xs">.pptx</span>
+          </button>
+
+          {/* PDF */}
+          <button
+            onClick={() => handleExport('pdf')}
+            disabled={isExporting}
+            className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-colors text-sm font-medium disabled:opacity-60 min-h-[48px]"
+          >
+            {exportingFormat === 'pdf'
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <FileText className="w-4 h-4" />
+            }
+            <span>📄 Download Guide</span>
+            <span className="text-rose-300 text-xs">.pdf</span>
+          </button>
+
+          {/* DOCX */}
+          <button
+            onClick={() => handleExport('docx')}
+            disabled={isExporting}
+            className="flex-1 flex items-center justify-center gap-2.5 px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium disabled:opacity-60 min-h-[48px]"
+          >
+            {exportingFormat === 'docx'
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <FileCheck className="w-4 h-4" />
+            }
+            <span>📝 Download Doc</span>
+            <span className="text-blue-300 text-xs">.docx</span>
+          </button>
+        </div>
+      </div>
+
       {/* Bottom actions */}
       <div className="mt-4 flex flex-col sm:flex-row gap-3 justify-between items-center">
         <p className="text-sm text-gray-500">
           Created {new Date(plan.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </p>
-        <div className="flex gap-3">
-          <button
-            onClick={handleExportPdf}
-            disabled={exporting}
-            className="flex items-center gap-2 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-sm min-h-[44px] disabled:opacity-60"
-          >
-            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-            Export to PDF
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium min-h-[44px] disabled:opacity-60"
-          >
-            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Changes
-          </button>
-        </div>
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors text-sm font-medium min-h-[44px] disabled:opacity-60"
+        >
+          {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          Save Changes
+        </button>
       </div>
     </div>
   )
